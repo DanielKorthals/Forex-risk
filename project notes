@@ -1,0 +1,43 @@
+#project plan
+nou laat ik even een paar dingen opsomen: we hebben een git repository gemaakt genaamd Forex-risk, we hebben visual studio geinstalleerd zodat het op de git bash terminal kan werken. Ik heb zelf VS studio gedownload en daarin ook een clone van de repo gezet van git. We hebben inderdaad ook het fx_model.py bestand aangemaakt met het ml model met gesimuleerde data. We hebben inderdaad nog niks gedaan met docker of kubernetes. what you suggested earlier: (which is what we are still currently working on) Adjusted Project Plan to Include These Tools 
+
+✅ Step 1: Data & Model Development Fetch or simulate FX rate data Train an ARIMA/Regression model Log experiments & models in MLflow 
+✅ Step 2: API & Deployment Prep Build a FastAPI service to serve predictions Containerize with Docker Set up MLflow tracking server 
+✅ Step 3: Kubernetes Deployment Deploy API on Azure Kubernetes Service (AKS) Expose the model using Kubernetes Ingress 
+
+This will be a killer portfolio project that shows: 
+✅ Machine Learning (ARIMA/Regression) 
+✅ MLOps (MLflow, model registry) 
+✅ Cloud & DevOps (Docker, Kubernetes, Azure AKS) 
+
+📌 How We’ll Use Kubernetes & MLflow 
+✅ MLflow (for Experiment Tracking & Model Registry) Track ARIMA/Regression experiments, hyperparameters & metrics Store trained models in MLflow Model Registry Compare different models to find the best one 
+✅ Kubernetes (for Scalable Deployment) Containerize the FastAPI/Flask app with Docker Deploy it as a Kubernetes service on Azure Kubernetes Service (AKS) Enable auto-scaling for handling multiple requests 
+
+C:\Users\DanielKorthalsHouseo\Forex-risk\Forex-risk (dit is de directory op m'n pc)
+
+
+
+#project structure:
+
+fx-risk-management/
+│── app/                
+│   ├── main.py          # FastAPI app for serving risk predictions
+│   ├── database.py      # SQLite database connection
+│── models/             
+│   ├── fx_model.py      # ARIMA/Regression model
+│   ├── train.py         # Model training & MLflow logging
+│── data/               
+│   ├── fx_rates.csv     # Exchange rate data
+│   ├── transactions.csv # Transactions dataset
+│── mlflow/              # MLflow setup
+│   ├── tracking.py      # MLflow tracking server
+│── kubernetes/          # Kubernetes configs
+│   ├── deployment.yaml  # K8s Deployment for the API
+│   ├── service.yaml     # K8s Service exposure
+│── dashboards/         
+│   ├── powerbi.pbix     # Power BI visualization
+│── Dockerfile           # Docker container setup
+│── requirements.txt     # Python dependencies
+│── .gitignore           # Ignore unnecessary files
+│── README.md            # Project documentation

@@ -94,6 +94,7 @@ plt.title(f"ARIMA Model - Forecast for {target_currency}/{base_currency}")
 plt.xlabel("Date")
 plt.ylabel(f"Exchange Rate ({target_currency}/{base_currency})")
 plt.legend()
+plt.savefig("visualizations/ARIMA_forecast.png")
 plt.show()
 
 print("🔗 Voorspelling en model succesvol afgerond!")

@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/DanielKorthalsHouseo/Forex-risk/Forex-risk/mlruns/329445533760955422/501867c9212447de9885fb5df8feb6d7/artifacts
+end_time: 1742919273770
+entry_point_name: ''
+experiment_id: '329445533760955422'
+lifecycle_stage: active
+run_id: 501867c9212447de9885fb5df8feb6d7
+run_name: Random_Forest_Model
+run_uuid: 501867c9212447de9885fb5df8feb6d7
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1742919262925
+status: 3
+tags: []
+user_id: DanielKorthalsHouseo

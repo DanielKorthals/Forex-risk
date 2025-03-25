@@ -1,35 +1,72 @@
-import requests
 import pandas as pd
-import datetime
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+import mlflow
+import mlflow.sklearn
+import matplotlib.pyplot as plt
+from datetime import datetime
 
-# 📌 API Settings
-BASE_CURRENCY = "USD"
-TARGET_CURRENCIES = ["EUR", "GBP", "JPY", "AUD", "CHF"]
-START_DATE = "2023-01-01"  # Adjust the start date as needed
-END_DATE = datetime.datetime.now().strftime("%Y-%m-%d")
+# 📂 Load the data
+data = pd.read_csv("datafiles/forex_rates.csv")
 
-# 🗓️ Generate a list of dates
-date_range = pd.date_range(start=START_DATE, end=END_DATE)
+# 🧹 Preprocess the data
+data['date'] = pd.to_datetime(data['date'])
+data = data.set_index('date')
+data = data.ffill()
 
-# 📊 Collect data for each date
-data_list = []
+# 🎯 Use EUR as base currency and USD as target
+base_currency = "USD"
+target_currency = "EUR"
 
-for date in date_range:
-    date_str = date.strftime("%Y-%m-%d")
-    API_URL = f"https://api.frankfurter.app/{date_str}?from={BASE_CURRENCY}"
-    response = requests.get(API_URL)
-    data = response.json()
+# 💡 Feature Engineering: Create time-based features
+data['day_of_week'] = data.index.dayofweek
+data['day_of_month'] = data.index.day
+data['month'] = data.index.month
+data['day_of_year'] = data.index.dayofyear
 
-    if "rates" in data:
-        forex_data = {"date": date_str, "base_currency": BASE_CURRENCY}
-        for currency in TARGET_CURRENCIES:
-            forex_data[currency] = data["rates"].get(currency, None)
-        data_list.append(forex_data)
-        print(f"✅ Fetched data for {date_str}")
-    else:
-        print(f"❌ No data for {date_str}")
+# 🎯 Create features (X) and target (y)
+X = np.arange(len(data)).reshape(-1, 1)  # Using time steps as features
+y = data[target_currency].values  # Targeting USD/EUR conversion rate
 
-# 📂 Save data to CSV
-df = pd.DataFrame(data_list)
-df.to_csv("datafiles/forex_rates.csv", index=False)
-print("✅ Historical forex data saved to 'datafiles/forex_rates.csv'")
+# 📊 Train/Test Split
+train_size = int(len(X) * 0.8)
+X_train, X_test = X[:train_size], X[train_size:]
+y_train, y_test = y[:train_size], y[train_size:]
+
+# 💡 Train the model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# 📊 Make predictions
+y_pred = model.predict(X_test)
+
+# 📝 Evaluate the model
+mse = mean_squared_error(y_test, y_pred)
+print(f"Mean Squared Error: {mse}")
+
+# 📝 Log with MLflow
+mlflow.set_experiment("Forex Risk - Linear Regression")
+with mlflow.start_run(run_name="Linear_Regression_Model"):
+    mlflow.log_param("model_type", "Linear Regression")
+    mlflow.log_param("base_currency", base_currency)
+    mlflow.log_param("target_currency", target_currency)
+    mlflow.log_metric("mse", mse)
+    mlflow.sklearn.log_model(model, "linear_regression_model")
+    print("✅ Model logged to MLflow")
+
+# 📊 Plot actual vs predicted values
+plt.figure(figsize=(10, 5))
+plt.plot(data.index[train_size:], y_test, label="Actual Values", color="blue")
+plt.plot(data.index[train_size:], y_pred, label="Predicted Values", color="orange")
+plt.title(f"Linear Regression Model - {target_currency}/{base_currency}")
+plt.xlabel("Date")
+plt.ylabel(f"Exchange Rate ({target_currency}/{base_currency})")
+plt.legend()
+
+# 💾 Save the plot
+plt.savefig("visualizations/linear_regression_forecast.png")
+plt.show()
+
+print("✅ Model training, evaluation, and visualization completed!")
+

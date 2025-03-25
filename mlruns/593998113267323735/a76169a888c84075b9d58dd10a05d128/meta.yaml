@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/DanielKorthalsHouseo/Forex-risk/Forex-risk/mlruns/593998113267323735/a76169a888c84075b9d58dd10a05d128/artifacts
+end_time: 1742931948427
+entry_point_name: ''
+experiment_id: '593998113267323735'
+lifecycle_stage: active
+run_id: a76169a888c84075b9d58dd10a05d128
+run_name: Linear_Regression_Model
+run_uuid: a76169a888c84075b9d58dd10a05d128
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1742931938887
+status: 3
+tags: []
+user_id: DanielKorthalsHouseo

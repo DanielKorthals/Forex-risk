@@ -67,6 +67,7 @@ plt.title(f"Random Forest Voorspelling voor {target_currency}/{base_currency}")
 plt.xlabel("Datum")
 plt.ylabel(f"Wisselkoers ({target_currency}/{base_currency})")
 plt.legend()
+plt.savefig("visualizations/random_forest_forecast.png")
 plt.show()
 
 print("🔗 Voorspelling en model succesvol afgerond!")

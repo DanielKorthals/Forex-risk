@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/DanielKorthalsHouseo/Forex-risk/Forex-risk/mlruns/460675849944342565/a071e6c7bed34f6aacd663454666410e/artifacts
+end_time: 1742575519405
+entry_point_name: ''
+experiment_id: '460675849944342565'
+lifecycle_stage: active
+run_id: a071e6c7bed34f6aacd663454666410e
+run_name: stately-rook-865
+run_uuid: a071e6c7bed34f6aacd663454666410e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1742575509076
+status: 3
+tags: []
+user_id: DanielKorthalsHouseo

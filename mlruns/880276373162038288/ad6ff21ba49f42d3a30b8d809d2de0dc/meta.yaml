@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/DanielKorthalsHouseo/Forex-risk/Forex-risk/mlruns/880276373162038288/ad6ff21ba49f42d3a30b8d809d2de0dc/artifacts
+end_time: 1742916243594
+entry_point_name: ''
+experiment_id: '880276373162038288'
+lifecycle_stage: active
+run_id: ad6ff21ba49f42d3a30b8d809d2de0dc
+run_name: ARIMA_Model
+run_uuid: ad6ff21ba49f42d3a30b8d809d2de0dc
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1742916233908
+status: 3
+tags: []
+user_id: DanielKorthalsHouseo

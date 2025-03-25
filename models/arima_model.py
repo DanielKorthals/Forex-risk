@@ -3,10 +3,9 @@ import numpy as np
 import mlflow
 import mlflow.sklearn
 import matplotlib.pyplot as plt
-from statsmodels.tsa.arima.model import ARIMA
-from statsmodels.tsa.stattools import adfuller
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
-from pmdarima import auto_arima
+from sklearn.model_selection import train_test_split
 import warnings
 
 # 🚫 Warnings onderdrukken
@@ -25,77 +24,69 @@ target_currency = "EUR"
 # 🎲 Kies de data die we willen voorspellen
 ts = data[target_currency]
 
-# Visualiseer de tijdreeks om stationariteit te controleren
-plt.figure(figsize=(10, 5))
-plt.plot(ts, label="Exchange Rate")
-plt.title(f"Time Series Plot of {target_currency}/{base_currency}")
-plt.xlabel("Date")
-plt.ylabel(f"Exchange Rate ({target_currency}/{base_currency})")
-plt.legend()
-plt.show()
+# 🔧 Lag features genereren (1 tot 30 dagen vertraging)
+for lag in range(1, 31):
+    data[f'lag_{lag}'] = ts.shift(lag)
 
-# 📈 Stationariteit controleren met de ADF-test
-print("🔍 Stationariteit controleren met de ADF-test...")
-result = adfuller(ts)
-print(f'ADF Statistic: {result[0]}')
-print(f'p-value: {result[1]}')
+# 📊 Rolling statistieken toevoegen (7 en 14 dagen gemiddelde en standaarddeviatie)
+data['rolling_mean_7'] = ts.rolling(window=7).mean().fillna(0)
+data['rolling_std_7'] = ts.rolling(window=7).std().fillna(0)
+data['rolling_mean_14'] = ts.rolling(window=14).mean().fillna(0)
+data['rolling_std_14'] = ts.rolling(window=14).std().fillna(0)
 
-if result[1] < 0.05:
-    print("✅ De tijdreeks is stationair.")
-else:
-    print("🚨 De tijdreeks is NIET stationair. Differencing nodig!")
-    # Indien niet stationair: differentiëren
-    ts = ts.diff().dropna()
-    print("🔄 Tijdreeks is gedifferentieerd om stationariteit te bereiken.")
+# 💡 Verschillen (returns) toevoegen
+data['diff_1'] = ts.diff().fillna(0)
+data['diff_7'] = ts.diff(periods=7).fillna(0)
 
-# 💡 ARIMA Parameters (p, d, q) automatisch vinden
-print("🔍 Finding optimal ARIMA parameters...")
-arima_model = auto_arima(ts, start_p=1, start_q=1,
-                         max_p=5, max_q=5, seasonal=False,
-                         trace=True, error_action='ignore', suppress_warnings=True)
+# 🎲 Drop NaN's die door lags en rolling ontstaan
+data = data.dropna()
 
-# Beste parameters
-p, d, q = arima_model.order
-print(f"✅ Best ARIMA parameters: p={p}, d={d}, q={q}")
+# 📊 Features en Doelvariabele
+feature_cols = [f'lag_{i}' for i in range(1, 31)] + ['rolling_mean_7', 'rolling_std_7', 'rolling_mean_14', 'rolling_std_14', 'diff_1', 'diff_7']
+X = data[feature_cols]
+y = data[target_currency]
 
-# 💡 ARIMA model fitten met de gevonden parameters
-model = ARIMA(ts, order=(p, d, q))
-fitted_model = model.fit()
+# 🧪 Train-test splitsing
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
 
-# 🔮 Voorspellingen maken
-n_periods = 30  # Aantal dagen vooruit voorspellen
-forecast = fitted_model.forecast(steps=n_periods)
-forecast_dates = pd.date_range(start=data.index[-1], periods=n_periods+1, freq='D')[1:]
+# 🌲 Random Forest Model met geoptimaliseerde hyperparameters
+model = RandomForestRegressor(n_estimators=200, max_depth=20, random_state=42)
+model.fit(X_train, y_train)
 
-# 🎯 Bereken de MSE op de laatste 30 dagen
-y_true = ts[-n_periods:]
-y_pred = forecast[:n_periods]
-mse = mean_squared_error(y_true, y_pred)
+# 🔮 Voorspellingen
+y_pred = model.predict(X_test)
+
+# 📊 Evaluatie
+mse = mean_squared_error(y_test, y_pred)
 print(f"Mean Squared Error (MSE): {mse}")
 
 # 📝 MLflow logging
-mlflow.set_experiment("Forex Risk - ARIMA")
-with mlflow.start_run(run_name="ARIMA_Model"):
-    mlflow.log_param("model_type", "ARIMA")
-    mlflow.log_param("p", p)
-    mlflow.log_param("d", d)
-    mlflow.log_param("q", q)
-    mlflow.log_param("n_periods", n_periods)
+mlflow.set_experiment("Forex Risk - Random Forest Enhanced")
+with mlflow.start_run(run_name="Random_Forest_Enhanced_Model"):
+    mlflow.log_param("model_type", "Random Forest Enhanced")
+    mlflow.log_param("n_estimators", 200)
+    mlflow.log_param("max_depth", 20)
+    mlflow.log_param("lags", 30)
+    mlflow.log_param("rolling_features", "mean_7, std_7, mean_14, std_14")
+    mlflow.log_param("diff_features", "diff_1, diff_7")
     mlflow.log_metric("mse", mse)
-    mlflow.log_artifact("datafiles/forex_rates.csv")
-    mlflow.sklearn.log_model(fitted_model, "arima_model")
-    print("✅ Model logged to MLflow")
+    mlflow.sklearn.log_model(model, "random_forest_enhanced_model")
+    print("✅ Enhanced Model logged to MLflow")
 
-# 📊 Visualisatie van voorspellingen
+# 📊 Visualisatie van Voorspellingen
 plt.figure(figsize=(10, 5))
-plt.plot(ts[-100:], label="Historical Data")
-plt.plot(forecast_dates, forecast, label="Forecast", color="orange")
-plt.title(f"ARIMA Model - Forecast for {target_currency}/{base_currency}")
-plt.xlabel("Date")
-plt.ylabel(f"Exchange Rate ({target_currency}/{base_currency})")
+plt.plot(y_test.values, label="Werkelijke waarde")
+plt.plot(y_pred, label="Voorspelde waarde", color="orange")
+plt.title(f"Random Forest Enhanced Voorspelling voor {target_currency}/{base_currency}")
+plt.xlabel("Datum")
+plt.ylabel(f"Wisselkoers ({target_currency}/{base_currency})")
 plt.legend()
-plt.savefig("visualizations/ARIMA_forecast.png")
+
+# 💾 Grafiek opslaan
+plt.savefig("visualizations/random_forest_enhanced_forecast.png")
+
 plt.show()
 
-print("🔗 Voorspelling en model succesvol afgerond!")
+print("🔗 Verbeterde voorspelling en model succesvol afgerond!")
+
 

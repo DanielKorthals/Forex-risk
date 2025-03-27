@@ -1,21 +1,21 @@
-# Gebruik een lichte Python-image als basis
+# Use an official Python runtime as the base image
 FROM python:3.9-slim
 
-# Stel de werkdirectory in
+# Set the working directory inside the container
 WORKDIR /app
 
-# Kopieer requirements.txt en installeer de benodigde pakketten
+# Copy the requirements file into the container
 COPY requirements.txt .
+
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Kopieer de hele app-directory
-COPY app/ app/
+# Copy the rest of the application files
+COPY . .
 
-# Zorg ervoor dat de MLflow-tracking directory bestaat
-RUN mkdir -p /app/mlruns
-
-# Exposeer poort 8000 voor de API
+# Expose the port that the FastAPI app will run on
 EXPOSE 8000
 
-# Start de FastAPI-server via Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Command to run the FastAPI application
+CMD ["python", "app/main.py"]
+

@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forex-risk-api
+  labels:
+    app: forex-risk-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: forex-risk-api
+  template:
+    metadata:
+      labels:
+        app: forex-risk-api
+    spec:
+      containers:
+      - name: forex-risk-api
+        image: forexriskacr.azurecr.io/forex-risk-api:latest
+        ports:
+        - containerPort: 8000

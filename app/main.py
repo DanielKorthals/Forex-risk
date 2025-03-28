@@ -1,15 +1,15 @@
 from fastapi import FastAPI
 import pandas as pd
-import mlflow
+import joblib
 from pydantic import BaseModel
 
 # 🎉 Start de FastAPI-app
 app = FastAPI()
 
-# 📝 Model laden vanuit MLflow (Enhanced Random Forest)
-model = mlflow.pyfunc.load_model("models:/random_forest_enhanced_model/1")
+# 💾 Model laden vanuit het opgeslagen .pkl-bestand
+model = joblib.load("models/enhanced_random_forest.pkl")
 
-# 📦 Input data model
+# 📦 Input data model (verwacht gestructureerde input)
 class ForexInput(BaseModel):
     lag_1: float
     lag_7: float
@@ -27,14 +27,22 @@ class ForexInput(BaseModel):
     diff_7: float
     diff_30: float
 
-# 🎯 Endpoint voor voorspelling met Enhanced Random Forest
-@app.post("/predict")
-async def predict(data: ForexInput):
-    input_df = pd.DataFrame([data.dict()])
-    prediction = model.predict(input_df)
-    return {"model": "Enhanced Random Forest", "prediction": prediction[0]}
-
 # 🌐 Root endpoint
 @app.get("/")
 async def root():
     return {"message": "Welcome to the Forex Risk Prediction API - Enhanced Random Forest"}
+
+# 🎯 Voorspellingsendpoint
+@app.post("/predict")
+async def predict(data: ForexInput):
+    # 🎯 Zet input om naar een pandas DataFrame
+    input_df = pd.DataFrame([data.dict()])
+    
+    # 🔮 Maak een voorspelling
+    prediction = model.predict(input_df)
+    
+    # 💡 Response met voorspelling
+    return {
+        "model": "Enhanced Random Forest",
+        "prediction": prediction[0]
+    }

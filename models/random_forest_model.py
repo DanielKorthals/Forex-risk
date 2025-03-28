@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import mlflow
 import mlflow.sklearn
+import joblib
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
@@ -50,24 +51,34 @@ mse = mean_squared_error(y_test, y_pred)
 print(f"Mean Squared Error (MSE): {mse}")
 
 # 📝 MLflow logging
-mlflow.set_experiment("Forex Risk - Random Forest")
-with mlflow.start_run(run_name="Random_Forest_Model"):
+mlflow.set_experiment("Forex Risk - Enhanced Random Forest")
+with mlflow.start_run(run_name="Enhanced_Random_Forest_Model"):
+    # Parameters loggen
     mlflow.log_param("model_type", "Random Forest")
     mlflow.log_param("n_estimators", 100)
     mlflow.log_param("max_depth", 10)
+
+    # Metrics loggen
     mlflow.log_metric("mse", mse)
-    mlflow.sklearn.log_model(model, "random_forest_model")
+
+    # Model loggen met MLflow
+    mlflow.sklearn.log_model(model, "enhanced_random_forest_model")
     print("✅ Model logged to MLflow")
+
+    # Model opslaan als standalone bestand
+    joblib.dump(model, "models/enhanced_random_forest.pkl")
+    print("✅ Model opgeslagen als enhanced_random_forest.pkl")
 
 # 📊 Visualisatie van Voorspellingen
 plt.figure(figsize=(10, 5))
 plt.plot(y_test.values, label="Werkelijke waarde")
 plt.plot(y_pred, label="Voorspelde waarde", color="orange")
-plt.title(f"Random Forest Voorspelling voor {target_currency}/{base_currency}")
+plt.title(f"Enhanced Random Forest Voorspelling voor {target_currency}/{base_currency}")
 plt.xlabel("Datum")
 plt.ylabel(f"Wisselkoers ({target_currency}/{base_currency})")
 plt.legend()
-plt.savefig("visualizations/random_forest_forecast.png")
+plt.savefig("visualizations/random_forest_enhanced_forecast.png")
 plt.show()
 
 print("🔗 Voorspelling en model succesvol afgerond!")
+
